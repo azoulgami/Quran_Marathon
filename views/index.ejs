@@ -36,7 +36,10 @@
                                 <span class="student-count"><%= cls.studentCount %> students</span>
                             </div>
                             <div class="class-body">
-                                <p>View rankings & progress</p>
+                                <p><%= cls.totalPages %>/604 Pages</p>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: <%= (cls.totalPages / 604 * 100).toFixed(1) %>%"></div>
+                                </div>
                             </div>
                         </a>
                     <% }); %>

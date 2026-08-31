@@ -178,7 +178,8 @@ app.get("/", async (req, res) => {
         const classes = classesData.map(cls => ({
             id: cls.id,
             name: cls.name,
-            studentCount: cls.student_count
+            studentCount: cls.student_count,
+            totalPages: cls.total_pages
         }));
         const globalLeaderboard = await getAllStudents();
         res.render("index.ejs", { classes, globalLeaderboard, user: req.user });

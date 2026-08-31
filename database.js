@@ -82,7 +82,7 @@ export const updateUserPages = async (userId, pages) => {
 // Get classes with student count
 export const getClassesWithCounts = async () => {
     const result = await pool.query(`
-        SELECT c.id, c.name, COUNT(u.id) as student_count
+        SELECT c.id, c.name, COUNT(u.id) as student_count, COALESCE(SUM(u.pages_read), 0) as total_pages
         FROM classes c
         LEFT JOIN users u ON c.id = u.class_id
         GROUP BY c.id, c.name
