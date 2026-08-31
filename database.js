@@ -25,7 +25,7 @@ export const initializeDatabase = async () => {
         console.log('✅ Database tables created successfully');
 
         // Insert classes if they don't exist
-        const classNames = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8'];
+        const classNames = ['Saida', 'Nabila', 'Aziza', 'Faiza', 'Shahd', 'Soussen', 'Amira'];
         
         for (const className of classNames) {
             await pool.query(

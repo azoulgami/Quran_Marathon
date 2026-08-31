@@ -94,7 +94,7 @@ const ensureAuthenticated = (req, res, next) => {
 
 
 // Mock data
-const classes = [{ id: 1, name: "Level 1" }, { id: 2, name: "Level 2" }, { id: 3, name: "Level 3" }, { id: 4, name: "Level 4" }, { id: 5, name: "Level 5" }, { id: 6, name: "Level 6" }, { id: 7, name: "Level 7" }, { id: 8, name: "Level 8" }];
+const classes = [{ id: 1, name: "Saida" }, { id: 2, name: "Nabila" }, { id: 3, name: "Aziza" }, { id: 4, name: "Faiza" }, { id: 5, name: "Shahd" }, { id: 6, name: "Soussen" }, { id: 7, name: "Amira" }];
 const mockStudents = [
     { id: 1, classId: 1, name: "Ahmed", pagesRead: 450 },
     { id: 2, classId: 1, name: "Fatima", pagesRead: 520 },
