@@ -24,7 +24,9 @@ export const initializeDatabase = async () => {
 
         console.log('✅ Database tables created successfully');
 
-        // Insert classes if they don't exist
+        // Clear old classes and insert only teacher names
+        await pool.query('DELETE FROM classes');
+        
         const classNames = ['Saida', 'Nabila', 'Aziza', 'Faiza', 'Shahd', 'Soussen', 'Amira'];
         
         for (const className of classNames) {
@@ -34,7 +36,7 @@ export const initializeDatabase = async () => {
             );
         }
 
-        console.log('✅ Classes initialized');
+        console.log('✅ Classes initialized with teacher names');
     } catch (err) {
         console.error('Database initialization error:', err);
     }
