@@ -173,7 +173,13 @@ app.get("/logout", (req, res) => {
 // MAIN PAGE - Show all classes (PUBLIC)
 app.get("/", async (req, res) => {
     try {
-        const classes = await getClassesWithCounts();
+        const classesData = await getClassesWithCounts();
+        // Transform snake_case to camelCase
+        const classes = classesData.map(cls => ({
+            id: cls.id,
+            name: cls.name,
+            studentCount: cls.student_count
+        }));
         const globalLeaderboard = await getAllStudents();
         res.render("index.ejs", { classes, globalLeaderboard, user: req.user });
     } catch (err) {
