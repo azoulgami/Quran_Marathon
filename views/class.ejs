@@ -11,7 +11,10 @@
         <header>
             <div class="header-top">
                 <a href="/" class="back-btn">← Back to Classes</a>
-                <h1><%= className %></h1>
+                <div class="header-center">
+                    <img src="/images/logo.png" alt="Quran Marathon Logo" class="logo-small">
+                    <h1><%= className %></h1>
+                </div>
                 <div class="user-info">
                     <% if (user) { %>
                         <span class="welcome">Welcome, <%= user.fullName %></span>
