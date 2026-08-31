@@ -9,7 +9,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import session from "express-session";
 import bcrypt from "bcryptjs";
 import pool from "./db.js";
-import { getAllClasses, getClassById, createUser, getUserByEmail, getUserById, getStudentsByClass, updateUserPages, getClassesWithCounts, getAllStudents } from "./database.js";
+import { getAllClasses, getClassById, createUser, getUserByEmail, getUserById, getStudentsByClass, updateUserPages, getClassesWithCounts, getAllStudents, initializeDatabase } from "./database.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -215,6 +215,7 @@ app.post("/api/entries", ensureAuthenticated, async (req, res) => {
     }
 });
 
-app.listen(port, () => {
+app.listen(port, async () => {
+    await initializeDatabase();
     console.log(`Server running on port ${port}`);
 });
