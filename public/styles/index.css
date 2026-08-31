@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
     min-height: 100vh;
     padding: 20px;
 }
@@ -18,7 +18,7 @@ body {
 
 header {
     text-align: center;
-    color: white;
+    color: #FDB813;
     margin-bottom: 40px;
     position: relative;
 }
@@ -88,23 +88,24 @@ header h1 {
 }
 
 .login-btn {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
+    background: rgba(253, 184, 19, 0.2);
+    color: #FDB813;
     padding: 8px 15px;
     border-radius: 5px;
     text-decoration: none;
     font-size: 0.9rem;
     transition: background 0.3s;
     white-space: nowrap;
+    border: 1px solid #FDB813;
 }
 
 .login-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(253, 184, 19, 0.3);
 }
 
 .register-btn {
-    background: white;
-    color: #667eea;
+    background: #FDB813;
+    color: #1a1a1a;
     padding: 8px 15px;
     border-radius: 5px;
     text-decoration: none;
@@ -115,7 +116,7 @@ header h1 {
 }
 
 .register-btn:hover {
-    background: rgba(255, 255, 255, 0.9);
+    background: #D4AF37;
 }
 
 header .subtitle {
@@ -145,10 +146,12 @@ header .subtitle {
 
 .classes-section h2,
 .rankings-section h2,
-.add-student-section h2 {
-    color: white;
+.add-student-section h2,
+.leaderboard-section h2 {
+    color: #FDB813;
     margin-bottom: 20px;
     font-size: 1.8rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .classes-grid {
@@ -187,11 +190,12 @@ header .subtitle {
 }
 
 .student-count {
-    background: #667eea;
-    color: white;
+    background: #FDB813;
+    color: #1a1a1a;
     padding: 5px 10px;
     border-radius: 20px;
     font-size: 0.85rem;
+    font-weight: 600;
 }
 
 .class-body p {
@@ -211,13 +215,14 @@ header .subtitle {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, #FDB813 0%, #D4AF37 100%);
+    color: #1a1a1a;
+    font-weight: 600;
 }
 
 .btn-primary:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(253, 184, 19, 0.6);
 }
 
 .add-class-section,
@@ -277,13 +282,14 @@ header .subtitle {
 }
 
 .btn-secondary {
-    background: #764ba2;
-    color: white;
+    background: #FDB813;
+    color: #1a1a1a;
+    font-weight: 600;
 }
 
 .btn-secondary:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
+    box-shadow: 0 4px 12px rgba(253, 184, 19, 0.6);
 }
 
 /* Rankings Table */
@@ -337,7 +343,7 @@ header .subtitle {
 .rank {
     text-align: center;
     font-weight: 600;
-    color: #667eea;
+    color: #FDB813;
     font-size: 1.1rem;
 }
 
@@ -360,7 +366,7 @@ header .subtitle {
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(90deg, #FDB813 0%, #D4AF37 100%);
     transition: width 0.6s ease-in-out;
 }
 
@@ -454,8 +460,8 @@ header .subtitle {
 }
 
 .leaderboard-table thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, #FDB813 0%, #D4AF37 100%);
+    color: #1a1a1a;
 }
 
 .leaderboard-table th {
@@ -492,7 +498,7 @@ header .subtitle {
 .leaderboard-table .pages {
     text-align: center;
     font-weight: 600;
-    color: #667eea;
+    color: #FDB813;
     min-width: 80px;
 }
 
