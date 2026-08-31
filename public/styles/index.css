@@ -146,6 +146,26 @@ header .subtitle {
     opacity: 0.9;
 }
 
+header .subtitle-ar {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #FDB813;
+    margin: 15px 0 0 0;
+    direction: rtl;
+}
+
+.supervisor-banner {
+    padding: 15px 0;
+    text-align: center;
+}
+
+.supervisor-banner .subtitle-ar {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #FDB813;
+    font-weight: 700;
+}
+
 .back-btn {
     color: white;
     text-decoration: none;
