@@ -16,7 +16,7 @@
                 <div class="error"><%= message %></div>
             <% } %>
 
-            <form method="POST" action="/register">
+            <form method="POST" action="/register" onsubmit="ensureClassIdValue()">
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" placeholder="your@email.com" required>
@@ -38,7 +38,7 @@
 
                 <div class="form-group" id="classGroup">
                     <label for="classId">Select Your Class</label>
-                    <select id="classId" name="classId" required>
+                    <select id="classId" name="classId">
                         <option value="">Choose your class...</option>
                         <option value="1">Saida</option>
                         <option value="2">Nabila</option>
@@ -77,16 +77,31 @@
             
             if (role === 'teacher') {
                 classGroup.style.display = 'none';
-                classSelect.removeAttribute('required');
-                // Default to first class for teacher
-                classSelect.value = '1';
+                classSelect.value = '1'; // Set default class for teachers
             } else if (role === 'student') {
                 classGroup.style.display = 'block';
-                classSelect.setAttribute('required', 'required');
             } else {
                 classGroup.style.display = 'block';
-                classSelect.removeAttribute('required');
+                classSelect.value = '';
             }
+        }
+        
+        function ensureClassIdValue() {
+            const classSelect = document.getElementById('classId');
+            const role = document.getElementById('role').value;
+            
+            // For teachers, ensure classId is set to 1
+            if (role === 'teacher' && !classSelect.value) {
+                classSelect.value = '1';
+            }
+            
+            // For students, classId is required
+            if (role === 'student' && !classSelect.value) {
+                alert('Please select a class!');
+                return false;
+            }
+            
+            return true;
         }
         
         // Initialize on page load
