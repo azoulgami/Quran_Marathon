@@ -36,7 +36,7 @@
                     </select>
                 </div>
 
-                <div class="form-group" id="classGroup">
+                <div class="form-group">
                     <label for="classId">Select Your Class</label>
                     <select id="classId" name="classId">
                         <option value="">Choose your class...</option>
@@ -72,17 +72,13 @@
     <script>
         function toggleClassSelection() {
             const role = document.getElementById('role').value;
-            const classGroup = document.getElementById('classGroup');
-            const classSelect = document.getElementById('classId');
+            const classGroup = document.getElementById('classId').parentElement;
+            const classLabel = classGroup.querySelector('label');
             
             if (role === 'teacher') {
-                classGroup.style.display = 'none';
-                classSelect.value = '1'; // Set default class for teachers
+                classLabel.textContent = 'Select the class you teach';
             } else if (role === 'student') {
-                classGroup.style.display = 'block';
-            } else {
-                classGroup.style.display = 'block';
-                classSelect.value = '';
+                classLabel.textContent = 'Select your class';
             }
         }
         
@@ -90,13 +86,8 @@
             const classSelect = document.getElementById('classId');
             const role = document.getElementById('role').value;
             
-            // For teachers, ensure classId is set to 1
-            if (role === 'teacher' && !classSelect.value) {
-                classSelect.value = '1';
-            }
-            
-            // For students, classId is required
-            if (role === 'student' && !classSelect.value) {
+            // Both teachers and students need to select a class
+            if (!classSelect.value) {
                 alert('Please select a class!');
                 return false;
             }
