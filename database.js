@@ -44,6 +44,22 @@ export const initializeDatabase = async () => {
             );
         `);
 
+        // Fix foreign key constraint for existing homework tables (migration)
+        try {
+            await pool.query(`
+                ALTER TABLE homework
+                DROP CONSTRAINT IF EXISTS homework_created_by_fkey;
+            `);
+            await pool.query(`
+                ALTER TABLE homework
+                ADD CONSTRAINT homework_created_by_fkey 
+                FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE;
+            `);
+            console.log('✅ Updated homework foreign key constraint');
+        } catch (e) {
+            console.log('Foreign key constraint migration: May already exist or skipped');
+        }
+
         console.log('✅ Database tables created successfully');
     } catch (err) {
         console.error('Database initialization error:', err.message);
