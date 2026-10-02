@@ -39,20 +39,21 @@ export const initializeDatabase = async () => {
                 class_id INTEGER NOT NULL REFERENCES classes(id),
                 surah VARCHAR(100) NOT NULL,
                 pages INTEGER NOT NULL,
+                verses INTEGER,
                 created_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
 
-        // Migration: rename verses column to pages (for existing tables)
+        // Migration: add verses column if it doesn't exist
         try {
             await pool.query(`
                 ALTER TABLE homework
-                RENAME COLUMN verses TO pages;
+                ADD COLUMN IF NOT EXISTS verses INTEGER;
             `);
-            console.log('✅ Renamed homework.verses to homework.pages');
+            console.log('✅ Added verses column to homework table');
         } catch (e) {
-            console.log('Pages column migration: Column already renamed or skipped');
+            console.log('Verses column migration: Column may already exist or is being skipped');
         }
 
         // Fix foreign key constraint for existing homework tables (migration)
@@ -167,30 +168,30 @@ export const getAllStudents = async () => {
 // Get homework for a class
 export const getHomeworkByClass = async (classId) => {
     const result = await pool.query(
-        'SELECT id, class_id, surah, pages, created_by, created_at FROM homework WHERE class_id = $1 ORDER BY created_at DESC LIMIT 1',
+        'SELECT id, class_id, surah, pages, verses, created_by, created_at FROM homework WHERE class_id = $1 ORDER BY created_at DESC LIMIT 1',
         [classId]
     );
     return result.rows[0] || null;
 };
 
 // Create homework (replaces existing homework for the class)
-export const createHomework = async (classId, surah, pages, createdBy) => {
+export const createHomework = async (classId, surah, pages, verses, createdBy) => {
     // Delete existing homework for this class
     await pool.query('DELETE FROM homework WHERE class_id = $1', [classId]);
     
     // Create new homework
     const result = await pool.query(
-        'INSERT INTO homework (class_id, surah, pages, created_by) VALUES ($1, $2, $3, $4) RETURNING id, class_id, surah, pages, created_by, created_at',
-        [classId, surah, pages, createdBy]
+        'INSERT INTO homework (class_id, surah, pages, verses, created_by) VALUES ($1, $2, $3, $4, $5) RETURNING id, class_id, surah, pages, verses, created_by, created_at',
+        [classId, surah, pages, verses, createdBy]
     );
     return result.rows[0];
 };
 
 // Update homework
-export const updateHomework = async (homeworkId, surah, pages) => {
+export const updateHomework = async (homeworkId, surah, pages, verses) => {
     const result = await pool.query(
-        'UPDATE homework SET surah = $1, pages = $2 WHERE id = $3 RETURNING id, class_id, surah, pages, created_by, created_at',
-        [surah, pages, homeworkId]
+        'UPDATE homework SET surah = $1, pages = $2, verses = $3 WHERE id = $4 RETURNING id, class_id, surah, pages, verses, created_by, created_at',
+        [surah, pages, verses, homeworkId]
     );
     return result.rows[0];
 };
