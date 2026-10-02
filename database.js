@@ -23,6 +23,12 @@ export const initializeDatabase = async () => {
             );
         `);
 
+        // Add role column if it doesn't exist (migration for existing databases)
+        await pool.query(`
+            ALTER TABLE users
+            ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'student';
+        `);
+
         await pool.query(`
             CREATE TABLE IF NOT EXISTS homework (
                 id SERIAL PRIMARY KEY,
