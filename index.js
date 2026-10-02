@@ -288,6 +288,12 @@ app.post("/api/switch-class", ensureAuthenticated, async (req, res) => {
     }
 });
 
+// ===== ERROR HANDLING =====
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err);
+    res.status(500).send(`Internal Server Error: ${err.message}`);
+});
+
 app.listen(port, async () => {
     await initializeDatabase();
     console.log(`Server running on port ${port}`);

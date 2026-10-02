@@ -24,10 +24,14 @@ export const initializeDatabase = async () => {
         `);
 
         // Add role column if it doesn't exist (migration for existing databases)
-        await pool.query(`
-            ALTER TABLE users
-            ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'student';
-        `);
+        try {
+            await pool.query(`
+                ALTER TABLE users
+                ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'student';
+            `);
+        } catch (e) {
+            console.log('Role column migration: Column may already exist or is being skipped');
+        }
 
         await pool.query(`
             CREATE TABLE IF NOT EXISTS homework (
@@ -35,14 +39,15 @@ export const initializeDatabase = async () => {
                 class_id INTEGER NOT NULL REFERENCES classes(id),
                 surah VARCHAR(100) NOT NULL,
                 verses INTEGER NOT NULL,
-                created_by INTEGER NOT NULL REFERENCES users(id),
+                created_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
 
         console.log('✅ Database tables created successfully');
     } catch (err) {
-        console.error('Database initialization error:', err);
+        console.error('Database initialization error:', err.message);
+        throw err;
     }
 };
 
