@@ -60,6 +60,19 @@ export const initializeDatabase = async () => {
             console.log('Foreign key constraint migration: May already exist or skipped');
         }
 
+        // Clean up orphaned homework records (homework where created_by user no longer exists)
+        try {
+            const result = await pool.query(`
+                DELETE FROM homework
+                WHERE created_by NOT IN (SELECT id FROM users);
+            `);
+            if (result.rowCount > 0) {
+                console.log(`✅ Cleaned up ${result.rowCount} orphaned homework record(s)`);
+            }
+        } catch (e) {
+            console.log('Orphaned homework cleanup: Skipped or already clean');
+        }
+
         console.log('✅ Database tables created successfully');
     } catch (err) {
         console.error('Database initialization error:', err.message);
