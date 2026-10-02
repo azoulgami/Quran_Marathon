@@ -5,6 +5,172 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= className %> - Quran Marathon</title>
     <link rel="stylesheet" href="/styles/index.css">
+    <style>
+        .homework-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .homework-section h2 {
+            margin: 0 0 15px 0;
+            font-size: 1.3em;
+        }
+        
+        .homework-content {
+            font-size: 1.1em;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .homework-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+        
+        .no-homework {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+        
+        .edit-homework-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-homework-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .modal h2 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        
+        .modal input, .modal select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .modal-buttons button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-save {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-save:hover {
+            background: #5568d3;
+        }
+        
+        .btn-cancel {
+            background: #ddd;
+            color: #333;
+        }
+        
+        .btn-cancel:hover {
+            background: #ccc;
+        }
+        
+        .switch-class-section {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 10px;
+        }
+        
+        .switch-class-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .switch-class-btn:hover {
+            background: #ff5252;
+            transform: scale(1.05);
+        }
+        
+        .teacher-badge {
+            background: #ffd700;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -13,7 +179,12 @@
                 <a href="/" class="back-btn">← Back to Classes</a>
                 <div class="header-center">
                     <a href="/" class="logo-link"><img src="/images/logo.png" alt="Quran Marathon Logo" class="logo-small"></a>
-                    <h1><%= className %></h1>
+                    <h1>
+                        <%= className %>
+                        <% if (user && user.role === 'teacher') { %>
+                            <span class="teacher-badge">Teacher</span>
+                        <% } %>
+                    </h1>
                 </div>
                 <div class="user-info">
                     <% if (user) { %>
@@ -28,6 +199,27 @@
         </header>
 
         <main>
+            <!-- Homework Section -->
+            <section class="homework-section">
+                <h2>📝 This Week's Homework</h2>
+                <div class="homework-content">
+                    <% if (homework) { %>
+                        <div class="homework-item">
+                            <strong>Surah:</strong> <%= homework.surah %>
+                        </div>
+                        <div class="homework-item">
+                            <strong>Verses:</strong> <%= homework.verses %>
+                        </div>
+                    <% } else { %>
+                        <div class="no-homework">No homework assigned yet</div>
+                    <% } %>
+                </div>
+                <% if (user && user.role === 'teacher' && user.classId === classId) { %>
+                    <button class="edit-homework-btn" onclick="openHomeworkModal()">+ Add/Edit Homework</button>
+                <% } %>
+            </section>
+
+            <!-- Student Rankings Section -->
             <section class="rankings-section">
                 <h2>Student Rankings</h2>
                 <% if(students.length === 0) { %>
@@ -65,8 +257,164 @@
                     </div>
                 <% } %>
             </section>
+
+            <!-- Switch Class Section (for students only) -->
+            <% if (user && user.role === 'student') { %>
+                <section class="switch-class-section">
+                    <h3>Want to switch to another class?</h3>
+                    <p style="margin: 10px 0; color: #666; font-size: 0.9em;">Your progress will be reset when you switch classes.</p>
+                    <button class="switch-class-btn" onclick="openSwitchClassModal()">Switch Class</button>
+                </section>
+            <% } %>
         </main>
     </div>
 
+    <!-- Homework Modal -->
+    <div id="homeworkModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeHomeworkModal()">&times;</span>
+            <h2>Add/Edit Homework</h2>
+            <form id="homeworkForm" onsubmit="submitHomework(event)">
+                <label for="surah">Surah Name:</label>
+                <input type="text" id="surah" name="surah" placeholder="e.g., Al-Fatiha" required>
+                
+                <label for="verses">Number of Verses:</label>
+                <input type="number" id="verses" name="verses" placeholder="e.g., 7" min="1" required>
+                
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-save">Post Homework</button>
+                    <button type="button" class="btn-cancel" onclick="closeHomeworkModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Switch Class Modal -->
+    <div id="switchClassModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeSwitchClassModal()">&times;</span>
+            <h2>Switch Class</h2>
+            <p>Select the class you want to join:</p>
+            <form id="switchClassForm" onsubmit="submitSwitchClass(event)">
+                <select id="newClassId" name="newClassId" required>
+                    <option value="">Choose a new class...</option>
+                    <option value="1">Saida</option>
+                    <option value="2">Nabila</option>
+                    <option value="3">Aziza</option>
+                    <option value="4">Faiza</option>
+                    <option value="5">Shahd</option>
+                    <option value="6">Soussen</option>
+                    <option value="7">Amira</option>
+                </select>
+                
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-save">Switch Class</button>
+                    <button type="button" class="btn-cancel" onclick="closeSwitchClassModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openHomeworkModal() {
+            document.getElementById('homeworkModal').style.display = 'block';
+            <% if (homework) { %>
+                document.getElementById('surah').value = '<%= homework.surah %>';
+                document.getElementById('verses').value = '<%= homework.verses %>';
+            <% } %>
+        }
+
+        function closeHomeworkModal() {
+            document.getElementById('homeworkModal').style.display = 'none';
+        }
+
+        function openSwitchClassModal() {
+            document.getElementById('switchClassModal').style.display = 'block';
+        }
+
+        function closeSwitchClassModal() {
+            document.getElementById('switchClassModal').style.display = 'none';
+        }
+
+        async function submitHomework(event) {
+            event.preventDefault();
+            
+            const surah = document.getElementById('surah').value;
+            const verses = document.getElementById('verses').value;
+            const classId = <%= classId %>;
+
+            try {
+                const response = await fetch('/api/homework', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ classId, surah, verses })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Homework posted successfully!');
+                    closeHomeworkModal();
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                alert('Error posting homework');
+            }
+        }
+
+        async function submitSwitchClass(event) {
+            event.preventDefault();
+            
+            const newClassId = document.getElementById('newClassId').value;
+            const currentClassId = <%= classId %>;
+
+            if (newClassId == currentClassId) {
+                alert('Please select a different class!');
+                return;
+            }
+
+            if (!confirm('Are you sure? Your progress will be reset to 0.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/switch-class', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ newClassId })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Class switched successfully! Your progress has been reset.');
+                    window.location.href = '/class/' + newClassId;
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                alert('Error switching class');
+            }
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const homeworkModal = document.getElementById('homeworkModal');
+            const switchClassModal = document.getElementById('switchClassModal');
+            
+            if (event.target == homeworkModal) {
+                homeworkModal.style.display = 'none';
+            }
+            if (event.target == switchClassModal) {
+                switchClassModal.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>

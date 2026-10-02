@@ -9,7 +9,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import session from "express-session";
 import bcrypt from "bcryptjs";
 import pool from "./db.js";
-import { getAllClasses, getClassById, createUser, getUserByEmail, getUserById, getStudentsByClass, updateUserPages, getClassesWithCounts, getAllStudents, initializeDatabase } from "./database.js";
+import { getAllClasses, getClassById, createUser, getUserByEmail, getUserById, getStudentsByClass, updateUserPages, getClassesWithCounts, getAllStudents, initializeDatabase, getHomeworkByClass, createHomework, updateHomework, deleteHomework, changeUserClass } from "./database.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -72,6 +72,7 @@ passport.deserializeUser(async (id, done) => {
             user.classId = user.class_id;
             user.pagesRead = user.pages_read;
             user.createdAt = user.created_at;
+            // user.role is already in camelCase
         }
         done(null, user);
     } catch (err) {
@@ -119,7 +120,7 @@ app.get("/register", (req, res) => {
 
 // Register new user
 app.post("/register", async (req, res) => {
-    const { email, fullName, classId, password, confirmPassword } = req.body;
+    const { email, fullName, classId, password, confirmPassword, role } = req.body;
 
     // Validation
     if (password !== confirmPassword) {
@@ -132,18 +133,19 @@ app.post("/register", async (req, res) => {
             return res.render("register.ejs", { message: "Email already registered!" });
         }
 
-        // Hash password and create user
+        // Hash password and create user with role
         const hashedPassword = bcrypt.hashSync(password, 10);
-        const newUser = await createUser(email, fullName, parseInt(classId), hashedPassword);
+        const newUser = await createUser(email, fullName, parseInt(classId), hashedPassword, role || 'student');
         
-        console.log(`New user registered: ${email}`);
+        console.log(`New user registered: ${email} as ${role || 'student'}`);
 
         // Auto-login after registration
         req.login({ 
             id: newUser.id, 
             email: newUser.email, 
             fullName: newUser.full_name,
-            classId: newUser.class_id 
+            classId: newUser.class_id,
+            role: newUser.role
         }, (err) => {
             if (err) return res.render("register.ejs", { message: "Registration error!" });
             res.redirect("/");
@@ -199,10 +201,13 @@ app.get("/class/:id", async (req, res) => {
         // Get students for this class, already sorted by pages read (descending)
         const students = await getStudentsByClass(classId);
         
-        res.render("class.ejs", { classId, className, students, user: req.user });
+        // Get homework for this class
+        const homework = await getHomeworkByClass(classId);
+        
+        res.render("class.ejs", { classId, className, students, homework, user: req.user });
     } catch (err) {
         console.error('Error fetching class:', err);
-        res.render("class.ejs", { classId: 0, className: "Error", students: [], user: req.user });
+        res.render("class.ejs", { classId: 0, className: "Error", students: [], homework: null, user: req.user });
     }
 });
 
@@ -219,6 +224,57 @@ app.post("/api/entries", ensureAuthenticated, async (req, res) => {
     } catch (err) {
         console.error('Error updating entry:', err);
         res.json({ success: false, message: "Error saving entry" });
+    }
+});
+
+// API - Create/Update homework (Teacher only)
+app.post("/api/homework", ensureAuthenticated, async (req, res) => {
+    try {
+        // Check if user is teacher
+        if (req.user.role !== 'teacher') {
+            return res.json({ success: false, message: "Only teachers can post homework" });
+        }
+
+        const { classId, surah, verses } = req.body;
+        const userId = req.user.id;
+        
+        // Verify teacher is assigned to this class
+        if (req.user.classId !== parseInt(classId)) {
+            return res.json({ success: false, message: "You can only post homework for your own class" });
+        }
+
+        // Create homework (removes old one)
+        const homework = await createHomework(parseInt(classId), surah, parseInt(verses), userId);
+        console.log(`Homework created for class ${classId}: ${surah} - ${verses} verses`);
+        res.json({ success: true, message: "Homework posted", homework });
+    } catch (err) {
+        console.error('Error creating homework:', err);
+        res.json({ success: false, message: "Error posting homework" });
+    }
+});
+
+// API - Switch class (Student only)
+app.post("/api/switch-class", ensureAuthenticated, async (req, res) => {
+    try {
+        // Check if user is student
+        if (req.user.role !== 'student') {
+            return res.json({ success: false, message: "Only students can switch classes" });
+        }
+
+        const { newClassId } = req.body;
+        
+        // Update user class and reset progress
+        const updatedUser = await changeUserClass(req.user.id, parseInt(newClassId));
+        
+        // Update session
+        req.user.classId = updatedUser.class_id;
+        req.user.pagesRead = updatedUser.pages_read;
+        
+        console.log(`User ${req.user.id} switched to class ${newClassId}`);
+        res.json({ success: true, message: "Class switched successfully", classId: updatedUser.class_id });
+    } catch (err) {
+        console.error('Error switching class:', err);
+        res.json({ success: false, message: "Error switching class" });
     }
 });
 

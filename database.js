@@ -16,8 +16,20 @@ export const initializeDatabase = async () => {
                 email VARCHAR(255) NOT NULL UNIQUE,
                 full_name VARCHAR(255) NOT NULL,
                 password VARCHAR(255) NOT NULL,
+                role VARCHAR(20) DEFAULT 'student',
                 class_id INTEGER NOT NULL REFERENCES classes(id),
                 pages_read INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS homework (
+                id SERIAL PRIMARY KEY,
+                class_id INTEGER NOT NULL REFERENCES classes(id),
+                surah VARCHAR(100) NOT NULL,
+                verses INTEGER NOT NULL,
+                created_by INTEGER NOT NULL REFERENCES users(id),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
@@ -41,10 +53,10 @@ export const getClassById = async (classId) => {
 };
 
 // Create user
-export const createUser = async (email, fullName, classId, hashedPassword) => {
+export const createUser = async (email, fullName, classId, hashedPassword, role = 'student') => {
     const result = await pool.query(
-        'INSERT INTO users (email, full_name, class_id, password) VALUES ($1, $2, $3, $4) RETURNING id, email, full_name, class_id, pages_read',
-        [email, fullName, classId, hashedPassword]
+        'INSERT INTO users (email, full_name, class_id, password, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, full_name, class_id, role, pages_read',
+        [email, fullName, classId, hashedPassword, role]
     );
     return result.rows[0];
 };
@@ -57,7 +69,7 @@ export const getUserByEmail = async (email) => {
 
 // Get user by ID
 export const getUserById = async (userId) => {
-    const result = await pool.query('SELECT id, email, full_name, class_id, pages_read, created_at FROM users WHERE id = $1', [userId]);
+    const result = await pool.query('SELECT id, email, full_name, class_id, role, pages_read, created_at FROM users WHERE id = $1', [userId]);
     return result.rows[0];
 };
 
@@ -97,4 +109,50 @@ export const getAllStudents = async () => {
         'SELECT id, full_name, pages_read, class_id FROM users ORDER BY pages_read DESC LIMIT 50'
     );
     return result.rows;
+};
+
+// Homework functions
+// Get homework for a class
+export const getHomeworkByClass = async (classId) => {
+    const result = await pool.query(
+        'SELECT id, class_id, surah, verses, created_by, created_at FROM homework WHERE class_id = $1 ORDER BY created_at DESC LIMIT 1',
+        [classId]
+    );
+    return result.rows[0] || null;
+};
+
+// Create homework (replaces existing homework for the class)
+export const createHomework = async (classId, surah, verses, createdBy) => {
+    // Delete existing homework for this class
+    await pool.query('DELETE FROM homework WHERE class_id = $1', [classId]);
+    
+    // Create new homework
+    const result = await pool.query(
+        'INSERT INTO homework (class_id, surah, verses, created_by) VALUES ($1, $2, $3, $4) RETURNING id, class_id, surah, verses, created_by, created_at',
+        [classId, surah, verses, createdBy]
+    );
+    return result.rows[0];
+};
+
+// Update homework
+export const updateHomework = async (homeworkId, surah, verses) => {
+    const result = await pool.query(
+        'UPDATE homework SET surah = $1, verses = $2 WHERE id = $3 RETURNING id, class_id, surah, verses, created_by, created_at',
+        [surah, verses, homeworkId]
+    );
+    return result.rows[0];
+};
+
+// Delete homework
+export const deleteHomework = async (homeworkId) => {
+    await pool.query('DELETE FROM homework WHERE id = $1', [homeworkId]);
+};
+
+// Change user class (resets progress)
+export const changeUserClass = async (userId, newClassId) => {
+    const result = await pool.query(
+        'UPDATE users SET class_id = $1, pages_read = 0 WHERE id = $2 RETURNING id, email, full_name, class_id, role, pages_read',
+        [newClassId, userId]
+    );
+    return result.rows[0];
 };
