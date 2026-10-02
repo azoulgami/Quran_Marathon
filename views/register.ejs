@@ -16,7 +16,7 @@
                 <div class="error"><%= message %></div>
             <% } %>
 
-            <form method="POST" action="/register" onsubmit="ensureClassIdValue()">
+            <form method="POST" action="/register" onsubmit="return ensureClassIdValue()">
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" placeholder="your@email.com" required>

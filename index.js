@@ -135,6 +135,15 @@ app.post("/register", async (req, res) => {
 
         // Hash password and create user with role
         const hashedPassword = bcrypt.hashSync(password, 10);
+        
+        // Debug logging
+        console.log('Registration attempt:', { email, fullName, classId, role });
+        
+        if (!classId) {
+            console.error('ClassId is missing or empty');
+            return res.render("register.ejs", { message: "Please select a class!" });
+        }
+        
         const newUser = await createUser(email, fullName, parseInt(classId), hashedPassword, role || 'student');
         
         console.log(`New user registered: ${email} as ${role || 'student'}`);
@@ -151,8 +160,9 @@ app.post("/register", async (req, res) => {
             res.redirect("/");
         });
     } catch (err) {
-        console.error('Registration error:', err);
-        res.render("register.ejs", { message: "An error occurred. Please try again." });
+        console.error('Registration error:', err.message);
+        console.error('Full error:', err);
+        res.render("register.ejs", { message: "An error occurred: " + err.message });
     }
 });
 
