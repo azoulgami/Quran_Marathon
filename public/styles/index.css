@@ -95,7 +95,7 @@ header h1 {
 }
 
 .logout-btn {
-    background: rgba(255, 255, 255, 0.2);
+    background: #ff6b6b;
     color: white;
     padding: 8px 15px;
     border-radius: 5px;
@@ -103,10 +103,13 @@ header h1 {
     font-size: 0.9rem;
     transition: background 0.3s;
     white-space: nowrap;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
 }
 
 .logout-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: #ff5252;
 }
 
 .login-btn {

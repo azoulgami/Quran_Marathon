@@ -38,11 +38,22 @@ export const initializeDatabase = async () => {
                 id SERIAL PRIMARY KEY,
                 class_id INTEGER NOT NULL REFERENCES classes(id),
                 surah VARCHAR(100) NOT NULL,
-                verses INTEGER NOT NULL,
+                pages INTEGER NOT NULL,
                 created_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
+
+        // Migration: rename verses column to pages (for existing tables)
+        try {
+            await pool.query(`
+                ALTER TABLE homework
+                RENAME COLUMN verses TO pages;
+            `);
+            console.log('✅ Renamed homework.verses to homework.pages');
+        } catch (e) {
+            console.log('Pages column migration: Column already renamed or skipped');
+        }
 
         // Fix foreign key constraint for existing homework tables (migration)
         try {
@@ -116,8 +127,8 @@ export const getUserById = async (userId) => {
 // Get students by class ID (sorted by pages read)
 export const getStudentsByClass = async (classId) => {
     const result = await pool.query(
-        'SELECT id, full_name, pages_read FROM users WHERE class_id = $1 ORDER BY pages_read DESC',
-        [classId]
+        'SELECT id, full_name, pages_read FROM users WHERE class_id = $1 AND role = $2 ORDER BY pages_read DESC',
+        [classId, 'student']
     );
     return result.rows;
 };
@@ -136,7 +147,7 @@ export const getClassesWithCounts = async () => {
     const result = await pool.query(`
         SELECT c.id, c.name, COUNT(u.id) as student_count, COALESCE(SUM(u.pages_read), 0) as total_pages
         FROM classes c
-        LEFT JOIN users u ON c.id = u.class_id
+        LEFT JOIN users u ON c.id = u.class_id AND u.role = 'student'
         GROUP BY c.id, c.name
         ORDER BY c.id
     `);
@@ -146,7 +157,8 @@ export const getClassesWithCounts = async () => {
 // Get all students sorted by pages read (global leaderboard)
 export const getAllStudents = async () => {
     const result = await pool.query(
-        'SELECT id, full_name, pages_read, class_id FROM users ORDER BY pages_read DESC LIMIT 50'
+        'SELECT id, full_name, pages_read, class_id FROM users WHERE role = $1 ORDER BY pages_read DESC LIMIT 50',
+        ['student']
     );
     return result.rows;
 };
@@ -155,30 +167,30 @@ export const getAllStudents = async () => {
 // Get homework for a class
 export const getHomeworkByClass = async (classId) => {
     const result = await pool.query(
-        'SELECT id, class_id, surah, verses, created_by, created_at FROM homework WHERE class_id = $1 ORDER BY created_at DESC LIMIT 1',
+        'SELECT id, class_id, surah, pages, created_by, created_at FROM homework WHERE class_id = $1 ORDER BY created_at DESC LIMIT 1',
         [classId]
     );
     return result.rows[0] || null;
 };
 
 // Create homework (replaces existing homework for the class)
-export const createHomework = async (classId, surah, verses, createdBy) => {
+export const createHomework = async (classId, surah, pages, createdBy) => {
     // Delete existing homework for this class
     await pool.query('DELETE FROM homework WHERE class_id = $1', [classId]);
     
     // Create new homework
     const result = await pool.query(
-        'INSERT INTO homework (class_id, surah, verses, created_by) VALUES ($1, $2, $3, $4) RETURNING id, class_id, surah, verses, created_by, created_at',
-        [classId, surah, verses, createdBy]
+        'INSERT INTO homework (class_id, surah, pages, created_by) VALUES ($1, $2, $3, $4) RETURNING id, class_id, surah, pages, created_by, created_at',
+        [classId, surah, pages, createdBy]
     );
     return result.rows[0];
 };
 
 // Update homework
-export const updateHomework = async (homeworkId, surah, verses) => {
+export const updateHomework = async (homeworkId, surah, pages) => {
     const result = await pool.query(
-        'UPDATE homework SET surah = $1, verses = $2 WHERE id = $3 RETURNING id, class_id, surah, verses, created_by, created_at',
-        [surah, verses, homeworkId]
+        'UPDATE homework SET surah = $1, pages = $2 WHERE id = $3 RETURNING id, class_id, surah, pages, created_by, created_at',
+        [surah, pages, homeworkId]
     );
     return result.rows[0];
 };

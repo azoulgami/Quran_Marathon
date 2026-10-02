@@ -245,7 +245,7 @@ app.post("/api/homework", ensureAuthenticated, async (req, res) => {
             return res.json({ success: false, message: "Only teachers can post homework" });
         }
 
-        const { classId, surah, verses } = req.body;
+        const { classId, surah, pages } = req.body;
         const userId = req.user.id;
         
         // Verify teacher is assigned to this class
@@ -254,8 +254,8 @@ app.post("/api/homework", ensureAuthenticated, async (req, res) => {
         }
 
         // Create homework (removes old one)
-        const homework = await createHomework(parseInt(classId), surah, parseInt(verses), userId);
-        console.log(`Homework created for class ${classId}: ${surah} - ${verses} verses`);
+        const homework = await createHomework(parseInt(classId), surah, parseInt(pages), userId);
+        console.log(`Homework created for class ${classId}: ${surah} - ${pages} pages`);
         res.json({ success: true, message: "Homework posted", homework });
     } catch (err) {
         console.error('Error creating homework:', err);

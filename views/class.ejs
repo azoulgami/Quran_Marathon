@@ -208,7 +208,7 @@
                             <strong>Surah:</strong> <%= homework.surah %>
                         </div>
                         <div class="homework-item">
-                            <strong>Verses:</strong> <%= homework.verses %>
+                            <strong>Pages:</strong> <%= homework.pages %>
                         </div>
                     <% } else { %>
                         <div class="no-homework">No homework assigned yet</div>
@@ -278,8 +278,8 @@
                 <label for="surah">Surah Name:</label>
                 <input type="text" id="surah" name="surah" placeholder="e.g., Al-Fatiha" required>
                 
-                <label for="verses">Number of Verses:</label>
-                <input type="number" id="verses" name="verses" placeholder="e.g., 7" min="1" required>
+                <label for="pages">Number of Pages:</label>
+                <input type="number" id="pages" name="pages" placeholder="e.g., 7" min="1" required>
                 
                 <div class="modal-buttons">
                     <button type="submit" class="btn-save">Post Homework</button>
@@ -320,7 +320,7 @@
             document.getElementById('homeworkModal').style.display = 'block';
             <% if (homework) { %>
                 document.getElementById('surah').value = '<%= homework.surah %>';
-                document.getElementById('verses').value = '<%= homework.verses %>';
+                document.getElementById('pages').value = '<%= homework.pages %>';
             <% } %>
         }
 
@@ -340,7 +340,7 @@
             event.preventDefault();
             
             const surah = document.getElementById('surah').value;
-            const verses = document.getElementById('verses').value;
+            const pages = document.getElementById('pages').value;
             const classId = <%= classId %>;
 
             try {
@@ -349,7 +349,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ classId, surah, verses })
+                    body: JSON.stringify({ classId, surah, pages })
                 });
 
                 const data = await response.json();
