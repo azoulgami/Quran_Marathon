@@ -241,14 +241,14 @@ app.post("/api/entries", ensureAuthenticated, async (req, res) => {
         const userId = req.user.id;
         const classId = req.user.classId;
         
-        // Calculate pages if not provided
+        // Calculate pages if not provided (inclusive: 2-2 = 1, 2-3 = 2, etc.)
         let pagesRead = parseFloat(pages);
         if (!pagesRead && fromPage && toPage) {
-            pagesRead = parseFloat(toPage) - parseFloat(fromPage);
+            pagesRead = parseFloat(toPage) - parseFloat(fromPage) + 1;
         }
         
-        if (isNaN(pagesRead) || pagesRead <= 0) {
-            return res.json({ success: false, message: "Invalid page range" });
+        if (isNaN(pagesRead) || pagesRead < 1) {
+            return res.json({ success: false, message: "Must read at least 1 page" });
         }
         
         // Create submission record
@@ -358,10 +358,11 @@ app.post("/api/submission/:id", ensureAuthenticated, async (req, res) => {
             return res.json({ success: false, message: "You don't have permission to edit this" });
         }
         
-        const pagesRead = parseFloat(toPage) - parseFloat(fromPage);
+        // Inclusive calculation: 2-2 = 1, 2-3 = 2, etc.
+        const pagesRead = parseFloat(toPage) - parseFloat(fromPage) + 1;
         
-        if (pagesRead <= 0) {
-            return res.json({ success: false, message: "Invalid page range" });
+        if (pagesRead < 1) {
+            return res.json({ success: false, message: "Must read at least 1 page" });
         }
         
         // Calculate difference for user pages_read adjustment
