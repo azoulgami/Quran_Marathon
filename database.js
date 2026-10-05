@@ -37,8 +37,8 @@ export const initializeDatabase = async () => {
             CREATE TABLE IF NOT EXISTS homework (
                 id SERIAL PRIMARY KEY,
                 class_id INTEGER NOT NULL REFERENCES classes(id),
-                start_page INTEGER NOT NULL,
-                end_page INTEGER NOT NULL,
+                start_page DECIMAL(10, 2) NOT NULL,
+                end_page DECIMAL(10, 2) NOT NULL,
                 created_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
@@ -60,13 +60,22 @@ export const initializeDatabase = async () => {
             `);
             await pool.query(`
                 ALTER TABLE homework
-                ADD COLUMN IF NOT EXISTS start_page INTEGER;
+                ADD COLUMN IF NOT EXISTS start_page DECIMAL(10, 2);
             `);
             await pool.query(`
                 ALTER TABLE homework
-                ADD COLUMN IF NOT EXISTS end_page INTEGER;
+                ADD COLUMN IF NOT EXISTS end_page DECIMAL(10, 2);
             `);
-            console.log('✅ Updated homework table to use page ranges');
+            // Alter existing columns to DECIMAL if they are INTEGER
+            await pool.query(`
+                ALTER TABLE homework
+                ALTER COLUMN start_page TYPE DECIMAL(10, 2);
+            `);
+            await pool.query(`
+                ALTER TABLE homework
+                ALTER COLUMN end_page TYPE DECIMAL(10, 2);
+            `);
+            console.log('✅ Updated homework table to use page ranges with decimal support');
         } catch (e) {
             console.log('Homework table migration: Columns may already exist or is being skipped');
         }

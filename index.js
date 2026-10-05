@@ -254,7 +254,7 @@ app.post("/api/homework", ensureAuthenticated, async (req, res) => {
         }
 
         // Create homework (removes old one)
-        const homework = await createHomework(parseInt(classId), parseInt(startPage), parseInt(endPage), userId);
+        const homework = await createHomework(parseInt(classId), parseFloat(startPage), parseFloat(endPage), userId);
         console.log(`Homework created for class ${classId}: Pages ${startPage} to ${endPage}`);
         res.json({ success: true, message: "Homework posted", homework });
     } catch (err) {
