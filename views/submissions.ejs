@@ -7,45 +7,50 @@
     <link rel="stylesheet" href="/styles/index.css">
     <link rel="stylesheet" href="/styles/auth.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background: #f8f9fa;
+            background: #f5f5f5;
+        }
+
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         .submissions-container {
             max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            margin-top: 20px;
-            margin-bottom: 20px;
+            margin: 30px auto;
+            padding: 0 20px;
+            width: 100%;
         }
 
         .submissions-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-        }
-
-        .submissions-header h1 {
-            margin: 0;
-            color: #2c3e50;
-            font-size: 2em;
-            font-weight: 700;
-            flex: 1;
-            min-width: 300px;
+            margin-bottom: 30px;
+            gap: 20px;
         }
 
         .submissions-header > div:first-child {
             flex: 1;
-            min-width: 300px;
+        }
+
+        .submissions-header h1 {
+            margin: 0 0 5px 0;
+            color: #2c3e50;
+            font-size: 2em;
+            font-weight: 700;
         }
 
         .submissions-header > div:first-child p {
-            margin: 5px 0 0 0 !important;
+            margin: 0;
             color: #7f8c8d;
             font-size: 0.95em;
             font-weight: 500;
@@ -63,6 +68,7 @@
             font-weight: 500;
             transition: background 0.3s;
             white-space: nowrap;
+            height: fit-content;
         }
 
         .back-button:hover {
@@ -229,98 +235,6 @@
         .modal-content {
             background-color: white;
             margin: 10% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .close:hover {
-            color: #000;
-        }
-
-        .modal-content h2 {
-            margin-top: 0;
-            color: #333;
-        }
-
-        .modal-content form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .modal-content label {
-            display: block;
-            margin-bottom: 5px;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .modal-content input {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1em;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            margin-top: 15px;
-        }
-
-        .btn-save, .btn-cancel {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .btn-save {
-            background: #27ae60;
-            color: white;
-        }
-
-        .btn-save:hover {
-            background: #229954;
-        }
-
-        .btn-cancel {
-            background: #bdc3c7;
-            color: white;
-        }
-
-        .btn-cancel:hover {
-            background: #95a5a6;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 100;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.4);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 10% auto;
             padding: 25px;
             border: none;
             border-radius: 10px;
@@ -382,7 +296,32 @@
             margin-top: 20px;
         }
 
-        /* Responsive Design */
+        .btn-save, .btn-cancel {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-save {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #229954;
+        }
+
+        .btn-cancel {
+            background: #bdc3c7;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #95a5a6;
+        }
+
         @media (max-width: 768px) {
             .submissions-header {
                 flex-direction: column;
@@ -447,6 +386,7 @@
 
             .submissions-container {
                 padding: 10px;
+                margin: 20px auto;
             }
 
             .submission-card {
@@ -473,80 +413,82 @@
     </style>
 </head>
 <body>
-    <div class="header-top">
-        <h1>🎯 Quran Marathon</h1>
-        <% if (user) { %>
-            <div class="user-info">
-                <span><%= user.fullName %></span>
-                <span class="user-role"><%= user.role === 'teacher' ? '👨‍🏫 Teacher' : '📚 Student' %></span>
-                <a href="/logout" class="logout-btn">Logout</a>
-            </div>
-        <% } %>
-    </div>
-
-    <div class="submissions-container">
-        <div class="submissions-header">
-            <div>
-                <h1>👨‍🏫 <%= className %></h1>
-                <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 1em;">📋 Student Submissions</p>
-            </div>
-            <a href="/class/<%= classId %>" class="back-button">← Back to Class</a>
+    <div class="page-wrapper">
+        <div class="header-top">
+            <h1>🎯 Quran Marathon</h1>
+            <% if (user) { %>
+                <div class="user-info">
+                    <span><%= user.fullName %></span>
+                    <span class="user-role"><%= user.role === 'teacher' ? '👨‍🏫 Teacher' : '📚 Student' %></span>
+                    <a href="/logout" class="logout-btn">Logout</a>
+                </div>
+            <% } %>
         </div>
 
-        <% if (submissions.length > 0) { %>
-            <div class="submissions-grid">
-                <% submissions.forEach(submission => { %>
-                    <div class="submission-card">
-                        <div class="card-header">
-                            <h2 class="student-name"><%= submission.full_name %></h2>
-                            <span class="submission-badge">📋</span>
-                        </div>
+        <div class="submissions-container">
+            <div class="submissions-header">
+                <div>
+                    <h1>👨‍🏫 <%= className %></h1>
+                    <p>📋 Student Submissions</p>
+                </div>
+                <a href="/class/<%= classId %>" class="back-button">← Back to Class</a>
+            </div>
 
-                        <div class="card-content">
-                            <div class="info-item">
-                                <span class="info-label">From Page</span>
-                                <span class="info-value"><%= formatPages(submission.from_page) %></span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">To Page</span>
-                                <span class="info-value"><%= formatPages(submission.to_page) %></span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Pages Read</span>
-                                <span class="info-value" style="color: #27ae60;"><strong><%= formatPages(submission.pages_read) %></strong></span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Date</span>
-                                <span class="info-value"><%= new Date(submission.created_at).toLocaleDateString('en-US', { timeZone: 'America/New_York' }) %></span>
+            <% if (submissions.length > 0) { %>
+                <div class="submissions-grid">
+                    <% submissions.forEach(submission => { %>
+                        <div class="submission-card">
+                            <div class="card-header">
+                                <h2 class="student-name"><%= submission.full_name %></h2>
+                                <span class="submission-badge">📋</span>
                             </div>
 
-                            <% if (submission.surah) { %>
-                                <div class="surah-info">
-                                    <div class="surah-label">Surah</div>
-                                    <div class="surah-value"><%= submission.surah %></div>
+                            <div class="card-content">
+                                <div class="info-item">
+                                    <span class="info-label">From Page</span>
+                                    <span class="info-value"><%= formatPages(submission.from_page) %></span>
                                 </div>
-                            <% } %>
+                                <div class="info-item">
+                                    <span class="info-label">To Page</span>
+                                    <span class="info-value"><%= formatPages(submission.to_page) %></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Pages Read</span>
+                                    <span class="info-value" style="color: #27ae60;"><strong><%= formatPages(submission.pages_read) %></strong></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Date</span>
+                                    <span class="info-value"><%= new Date(submission.created_at).toLocaleDateString('en-US', { timeZone: 'America/New_York' }) %></span>
+                                </div>
 
-                            <div class="card-dates">
-                                <strong>📅 Submitted:</strong> <%= new Date(submission.created_at).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
-                                <% if (new Date(submission.updated_at).getTime() !== new Date(submission.created_at).getTime()) { %>
-                                    <br><strong>✏️ Updated:</strong> <%= new Date(submission.updated_at).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                                <% if (submission.surah) { %>
+                                    <div class="surah-info">
+                                        <div class="surah-label">Surah</div>
+                                        <div class="surah-value"><%= submission.surah %></div>
+                                    </div>
                                 <% } %>
+
+                                <div class="card-dates">
+                                    <strong>📅 Submitted:</strong> <%= new Date(submission.created_at).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                                    <% if (new Date(submission.updated_at).getTime() !== new Date(submission.created_at).getTime()) { %>
+                                        <br><strong>✏️ Updated:</strong> <%= new Date(submission.updated_at).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                                    <% } %>
+                                </div>
+                            </div>
+
+                            <div class="submission-actions">
+                                <button class="btn-edit" onclick="openEditModal(<%= submission.id %>, <%= submission.from_page %>, <%= submission.to_page %>, '<%= submission.surah %>)">✏️ Edit</button>
+                                <button class="btn-delete" onclick="deleteSubmission(<%= submission.id %>)">🗑️ Delete</button>
                             </div>
                         </div>
-
-                        <div class="submission-actions">
-                            <button class="btn-edit" onclick="openEditModal(<%= submission.id %>, <%= submission.from_page %>, <%= submission.to_page %>, '<%= submission.surah %>)">✏️ Edit</button>
-                            <button class="btn-delete" onclick="deleteSubmission(<%= submission.id %>)">🗑️ Delete</button>
-                        </div>
-                    </div>
-                <% }); %>
-            </div>
-        <% } else { %>
-            <div class="no-submissions">
-                <p>📝 No submissions yet</p>
-            </div>
-        <% } %>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="no-submissions">
+                    <p>📝 No submissions yet</p>
+                </div>
+            <% } %>
+        </div>
     </div>
 
     <!-- Edit Submission Modal -->
@@ -618,43 +560,45 @@
                 } else {
                     alert('Error: ' + data.message);
                 }
-            })
-            .catch(err => {
-                console.error('Error:', err);
-                alert('Error updating submission');
             });
         }
 
         function deleteSubmission(submissionId) {
-            if (!confirm('Are you sure you want to delete this submission?')) {
-                return;
+            if (confirm('Are you sure you want to delete this submission?')) {
+                fetch(`/api/submission/${submissionId}/delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Submission deleted successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                });
             }
-            
-            fetch(`/api/submission/${submissionId}/delete`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Submission deleted successfully!');
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(err => {
-                console.error('Error:', err);
-                alert('Error deleting submission');
-            });
         }
 
         // Close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('editModal');
-            if (event.target === modal) {
+            if (event.target == modal) {
                 closeEditModal();
             }
+        }
+
+        function formatPages(pages) {
+            if (pages === null || pages === undefined) return "0";
+            const num = parseFloat(pages);
+            const whole = Math.floor(num);
+            const decimal = num - whole;
+            
+            if (Math.abs(decimal - 0.5) < 0.01) {
+                return whole === 0 ? "1/2" : `${whole} 1/2`;
+            }
+            return whole.toString();
         }
     </script>
 </body>
