@@ -61,9 +61,10 @@
                 <h2>Add Your Pages</h2>
                 <% if (user) { %>
                     <form onsubmit="handleAddEntry(event)">
-                        <input type="number" placeholder="Pages Read" id="pagesInput" required min="0.5" step="0.5" max="604">
+                        <input type="number" placeholder="Pages Read (e.g., 1, 1.5, 2)" id="pagesInput" required min="0.5" step="0.5" max="604">
                         <input type="text" placeholder="Surah (e.g., Al-Fatiha)" id="surahInput" required>
                         <button type="submit" class="btn btn-primary">Add Pages</button>
+                        <small style="display:block; margin-top: 5px; color: #666;">Tip: Use 1.5 for 1½, 2.5 for 2½, etc.</small>
                     </form>
                 <% } else { %>
                     <div class="login-prompt">
@@ -104,7 +105,7 @@
                                             <% } %>
                                         </td>
                                         <td><%= student.full_name %></td>
-                                        <td class="pages"><strong><%= student.pages_read %>/604</strong></td>
+                                        <td class="pages"><strong><span id="pagesDisplay<%= student.id %>"><%= formatPages(student.pages_read) %></span>/604</strong></td>
                                         <td>
                                             <div class="progress">
                                                 <div class="progress-bar">
@@ -125,6 +126,18 @@
     </div>
 
     <script>
+        // Format decimal pages as fractions (0.5 -> "1/2", 1.5 -> "1 1/2", etc.)
+        function formatPages(pages) {
+            if (pages === null || pages === undefined) return "0";
+            const num = parseFloat(pages);
+            const whole = Math.floor(num);
+            const decimal = num - whole;
+            
+            if (decimal === 0.5) {
+                return whole === 0 ? "1/2" : whole + " 1/2";
+            }
+            return whole.toString();
+        }
         function handleAddEntry(event) {
             event.preventDefault();
             const pages = document.getElementById('pagesInput').value;

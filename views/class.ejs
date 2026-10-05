@@ -205,7 +205,7 @@
                 <div class="homework-content">
                     <% if (homework) { %>
                         <div class="homework-item">
-                            <strong>Pages:</strong> <%= homework.start_page %> - <%= homework.end_page %>
+                            <strong>Pages:</strong> <span id="homeworkRange"><%= formatPages(homework.start_page) %> - <%= formatPages(homework.end_page) %></span>
                         </div>
                     <% } else { %>
                         <div class="no-homework">No homework assigned yet</div>
@@ -248,7 +248,7 @@
                                         <div class="progress-fill" style="width: <%= (student.pages_read / 604) * 100 %>%"></div>
                                     </div>
                                 </div>
-                                <div class="pages"><%= student.pages_read %>/604</div>
+                                <div class="pages"><span id="pagesDisplay<%= student.id %>"><%= formatPages(student.pages_read) %></span>/604</div>
                             </div>
                         <% }); %>
                     </div>
@@ -277,6 +277,8 @@
                 
                 <label for="endPage">End Page:</label>
                 <input type="number" id="endPage" name="endPage" placeholder="e.g., 10 or 10.5" min="0.5" step="0.5" required>
+                
+                <small style="display:block; margin: 10px 0; color: #666;">Tip: Use 1.5 for 1½, 2.5 for 2½, etc.</small>
                 
                 <div class="modal-buttons">
                     <button type="submit" class="btn-save">Post Homework</button>
@@ -313,6 +315,19 @@
     </div>
 
     <script>
+        // Format decimal pages as fractions (0.5 -> "1/2", 1.5 -> "1 1/2", etc.)
+        function formatPages(pages) {
+            if (pages === null || pages === undefined) return "0";
+            const num = parseFloat(pages);
+            const whole = Math.floor(num);
+            const decimal = num - whole;
+            
+            if (decimal === 0.5) {
+                return whole === 0 ? "1/2" : whole + " 1/2";
+            }
+            return whole.toString();
+        }
+
         function openHomeworkModal() {
             document.getElementById('homeworkModal').style.display = 'block';
             <% if (homework) { %>
