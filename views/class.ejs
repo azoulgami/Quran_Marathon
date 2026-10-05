@@ -205,16 +205,8 @@
                 <div class="homework-content">
                     <% if (homework) { %>
                         <div class="homework-item">
-                            <strong>Surah:</strong> <%= homework.surah %>
+                            <strong>Pages:</strong> <%= homework.start_page %> - <%= homework.end_page %>
                         </div>
-                        <div class="homework-item">
-                            <strong>Pages:</strong> <%= homework.pages %>
-                        </div>
-                        <% if (homework.verses) { %>
-                            <div class="homework-item">
-                                <strong>Verses:</strong> <%= homework.verses %>
-                            </div>
-                        <% } %>
                     <% } else { %>
                         <div class="no-homework">No homework assigned yet</div>
                     <% } %>
@@ -280,14 +272,11 @@
             <span class="close" onclick="closeHomeworkModal()">&times;</span>
             <h2>Add/Edit Homework</h2>
             <form id="homeworkForm" onsubmit="submitHomework(event)">
-                <label for="surah">Surah Name:</label>
-                <input type="text" id="surah" name="surah" placeholder="e.g., Al-Fatiha" required>
+                <label for="startPage">Start Page:</label>
+                <input type="number" id="startPage" name="startPage" placeholder="e.g., 1" min="1" required>
                 
-                <label for="pages">Number of Pages:</label>
-                <input type="number" id="pages" name="pages" placeholder="e.g., 7" min="1" required>
-                
-                <label for="verses">Number of Verses (Optional):</label>
-                <input type="number" id="verses" name="verses" placeholder="e.g., 7" min="1">
+                <label for="endPage">End Page:</label>
+                <input type="number" id="endPage" name="endPage" placeholder="e.g., 10" min="1" required>
                 
                 <div class="modal-buttons">
                     <button type="submit" class="btn-save">Post Homework</button>
@@ -327,11 +316,8 @@
         function openHomeworkModal() {
             document.getElementById('homeworkModal').style.display = 'block';
             <% if (homework) { %>
-                document.getElementById('surah').value = '<%= homework.surah %>';
-                document.getElementById('pages').value = '<%= homework.pages %>';
-                <% if (homework.verses) { %>
-                    document.getElementById('verses').value = '<%= homework.verses %>';
-                <% } %>
+                document.getElementById('startPage').value = '<%= homework.start_page %>';
+                document.getElementById('endPage').value = '<%= homework.end_page %>';
             <% } %>
         }
 
@@ -350,9 +336,8 @@
         async function submitHomework(event) {
             event.preventDefault();
             
-            const surah = document.getElementById('surah').value;
-            const pages = document.getElementById('pages').value;
-            const verses = document.getElementById('verses').value;
+            const startPage = document.getElementById('startPage').value;
+            const endPage = document.getElementById('endPage').value;
             const classId = <%= classId %>;
 
             try {
@@ -361,7 +346,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ classId, surah, pages, verses })
+                    body: JSON.stringify({ classId, startPage, endPage })
                 });
 
                 const data = await response.json();

@@ -37,23 +37,38 @@ export const initializeDatabase = async () => {
             CREATE TABLE IF NOT EXISTS homework (
                 id SERIAL PRIMARY KEY,
                 class_id INTEGER NOT NULL REFERENCES classes(id),
-                surah VARCHAR(100) NOT NULL,
-                pages INTEGER NOT NULL,
-                verses INTEGER,
+                start_page INTEGER NOT NULL,
+                end_page INTEGER NOT NULL,
                 created_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
 
-        // Migration: add verses column if it doesn't exist
+        // Migration: replace old columns with new page range columns
         try {
             await pool.query(`
                 ALTER TABLE homework
-                ADD COLUMN IF NOT EXISTS verses INTEGER;
+                DROP COLUMN IF EXISTS surah CASCADE;
             `);
-            console.log('✅ Added verses column to homework table');
+            await pool.query(`
+                ALTER TABLE homework
+                DROP COLUMN IF EXISTS pages CASCADE;
+            `);
+            await pool.query(`
+                ALTER TABLE homework
+                DROP COLUMN IF EXISTS verses CASCADE;
+            `);
+            await pool.query(`
+                ALTER TABLE homework
+                ADD COLUMN IF NOT EXISTS start_page INTEGER;
+            `);
+            await pool.query(`
+                ALTER TABLE homework
+                ADD COLUMN IF NOT EXISTS end_page INTEGER;
+            `);
+            console.log('✅ Updated homework table to use page ranges');
         } catch (e) {
-            console.log('Verses column migration: Column may already exist or is being skipped');
+            console.log('Homework table migration: Columns may already exist or is being skipped');
         }
 
         // Fix foreign key constraint for existing homework tables (migration)
@@ -168,30 +183,30 @@ export const getAllStudents = async () => {
 // Get homework for a class
 export const getHomeworkByClass = async (classId) => {
     const result = await pool.query(
-        'SELECT id, class_id, surah, pages, verses, created_by, created_at FROM homework WHERE class_id = $1 ORDER BY created_at DESC LIMIT 1',
+        'SELECT id, class_id, start_page, end_page, created_by, created_at FROM homework WHERE class_id = $1 ORDER BY created_at DESC LIMIT 1',
         [classId]
     );
     return result.rows[0] || null;
 };
 
 // Create homework (replaces existing homework for the class)
-export const createHomework = async (classId, surah, pages, verses, createdBy) => {
+export const createHomework = async (classId, startPage, endPage, createdBy) => {
     // Delete existing homework for this class
     await pool.query('DELETE FROM homework WHERE class_id = $1', [classId]);
     
     // Create new homework
     const result = await pool.query(
-        'INSERT INTO homework (class_id, surah, pages, verses, created_by) VALUES ($1, $2, $3, $4, $5) RETURNING id, class_id, surah, pages, verses, created_by, created_at',
-        [classId, surah, pages, verses, createdBy]
+        'INSERT INTO homework (class_id, start_page, end_page, created_by) VALUES ($1, $2, $3, $4) RETURNING id, class_id, start_page, end_page, created_by, created_at',
+        [classId, startPage, endPage, createdBy]
     );
     return result.rows[0];
 };
 
 // Update homework
-export const updateHomework = async (homeworkId, surah, pages, verses) => {
+export const updateHomework = async (homeworkId, startPage, endPage) => {
     const result = await pool.query(
-        'UPDATE homework SET surah = $1, pages = $2, verses = $3 WHERE id = $4 RETURNING id, class_id, surah, pages, verses, created_by, created_at',
-        [surah, pages, verses, homeworkId]
+        'UPDATE homework SET start_page = $1, end_page = $2 WHERE id = $3 RETURNING id, class_id, start_page, end_page, created_by, created_at',
+        [startPage, endPage, homeworkId]
     );
     return result.rows[0];
 };
