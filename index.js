@@ -237,12 +237,22 @@ app.get("/class/:id", async (req, res) => {
 // API - Add/Update student entry
 app.post("/api/entries", ensureAuthenticated, async (req, res) => {
     try {
-        const { pages, surah } = req.body;
+        const { pages, surah, fromPage, toPage } = req.body;
         const userId = req.user.id;
         
+        // Calculate pages if not provided
+        let pagesRead = parseFloat(pages);
+        if (!pagesRead && fromPage && toPage) {
+            pagesRead = parseFloat(toPage) - parseFloat(fromPage);
+        }
+        
+        if (isNaN(pagesRead) || pagesRead <= 0) {
+            return res.json({ success: false, message: "Invalid page range" });
+        }
+        
         // Update pages for logged-in user (supports decimals for half-page increments)
-        const result = await updateUserPages(userId, parseFloat(pages));
-        console.log(`Updated entry for user ${userId}: ${pages} pages (${surah})`);
+        const result = await updateUserPages(userId, pagesRead);
+        console.log(`Updated entry for user ${userId}: ${pagesRead} pages (${surah}), from page ${fromPage} to ${toPage}`);
         res.json({ success: true, message: "Pages added", pagesRead: result.pages_read });
     } catch (err) {
         console.error('Error updating entry:', err);
