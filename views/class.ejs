@@ -212,7 +212,12 @@
                     <% } %>
                 </div>
                 <% if (user && user.role === 'teacher' && user.classId === classId) { %>
-                    <button class="edit-homework-btn" onclick="openHomeworkModal()">+ Add/Edit Homework</button>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button class="edit-homework-btn" onclick="openHomeworkModal()">+ Add/Edit Homework</button>
+                        <a href="/submissions/<%= classId %>" class="edit-homework-btn" style="text-decoration: none; background: #27ae60;">📋 View All Submissions</a>
+                    </div>
+                <% } else if (user && user.role === 'teacher') { %>
+                    <button class="edit-homework-btn" onclick="openHomeworkModal()" style="opacity: 0.5; cursor: not-allowed;" disabled>+ Add/Edit Homework</button>
                 <% } %>
             </section>
 

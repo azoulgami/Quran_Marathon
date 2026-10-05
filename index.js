@@ -9,7 +9,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import session from "express-session";
 import bcrypt from "bcryptjs";
 import pool from "./db.js";
-import { getAllClasses, getClassById, createUser, getUserByEmail, getUserById, getStudentsByClass, updateUserPages, getClassesWithCounts, getAllStudents, initializeDatabase, getHomeworkByClass, createHomework, updateHomework, deleteHomework, changeUserClass } from "./database.js";
+import { getAllClasses, getClassById, createUser, getUserByEmail, getUserById, getStudentsByClass, updateUserPages, getClassesWithCounts, getAllStudents, initializeDatabase, getHomeworkByClass, createHomework, updateHomework, deleteHomework, changeUserClass, getSubmissionsByClass, getSubmissionsByStudent, createSubmission, updateSubmission, deleteSubmission } from "./database.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -239,6 +239,7 @@ app.post("/api/entries", ensureAuthenticated, async (req, res) => {
     try {
         const { pages, surah, fromPage, toPage } = req.body;
         const userId = req.user.id;
+        const classId = req.user.classId;
         
         // Calculate pages if not provided
         let pagesRead = parseFloat(pages);
@@ -250,10 +251,13 @@ app.post("/api/entries", ensureAuthenticated, async (req, res) => {
             return res.json({ success: false, message: "Invalid page range" });
         }
         
-        // Update pages for logged-in user (supports decimals for half-page increments)
+        // Create submission record
+        const submission = await createSubmission(userId, classId, parseFloat(fromPage), parseFloat(toPage), pagesRead, surah);
+        
+        // Update total pages for user
         const result = await updateUserPages(userId, pagesRead);
-        console.log(`Updated entry for user ${userId}: ${pagesRead} pages (${surah}), from page ${fromPage} to ${toPage}`);
-        res.json({ success: true, message: "Pages added", pagesRead: result.pages_read });
+        console.log(`Updated entry for user ${userId}: ${pagesRead} pages (${surah}), from page ${fromPage} to ${toPage}, submission ID: ${submission.id}`);
+        res.json({ success: true, message: "Pages added", pagesRead: result.pages_read, submissionId: submission.id });
     } catch (err) {
         console.error('Error updating entry:', err);
         res.json({ success: false, message: "Error saving entry" });
@@ -308,6 +312,98 @@ app.post("/api/switch-class", ensureAuthenticated, async (req, res) => {
     } catch (err) {
         console.error('Error switching class:', err);
         res.json({ success: false, message: "Error switching class" });
+    }
+});
+
+// TEACHER SUBMISSIONS DASHBOARD
+app.get("/submissions/:classId", ensureAuthenticated, async (req, res) => {
+    try {
+        const classId = parseInt(req.params.classId);
+        const classData = await getClassById(classId);
+        const className = classData ? classData.name : "Class Not Found";
+        
+        // Check if user is teacher for this class
+        if (req.user.role !== 'teacher' || req.user.classId !== classId) {
+            return res.render("submissions.ejs", { 
+                classId: 0, 
+                className: "Error", 
+                submissions: [], 
+                user: req.user,
+                formatPages,
+                message: "You don't have permission to view this" 
+            });
+        }
+        
+        // Get all submissions for this class
+        const submissions = await getSubmissionsByClass(classId);
+        
+        res.render("submissions.ejs", { classId, className, submissions, user: req.user, formatPages });
+    } catch (err) {
+        console.error('Error fetching submissions:', err);
+        res.render("submissions.ejs", { classId: 0, className: "Error", submissions: [], user: req.user, formatPages });
+    }
+});
+
+// API - Update submission
+app.post("/api/submission/:id", ensureAuthenticated, async (req, res) => {
+    try {
+        const submissionId = parseInt(req.params.id);
+        const { fromPage, toPage, surah } = req.body;
+        
+        // Get submission to verify permissions
+        const submissions = await getSubmissionsByStudent(req.user.id);
+        const submission = submissions.find(s => s.id === submissionId);
+        
+        if (!submission && req.user.role !== 'teacher') {
+            return res.json({ success: false, message: "You don't have permission to edit this" });
+        }
+        
+        const pagesRead = parseFloat(toPage) - parseFloat(fromPage);
+        
+        if (pagesRead <= 0) {
+            return res.json({ success: false, message: "Invalid page range" });
+        }
+        
+        // Calculate difference for user pages_read adjustment
+        const pageDiff = pagesRead - parseFloat(submission.pages_read);
+        
+        // Update submission
+        const updated = await updateSubmission(submissionId, parseFloat(fromPage), parseFloat(toPage), pagesRead, surah);
+        
+        // Adjust user's total pages if changed
+        if (pageDiff !== 0) {
+            await updateUserPages(submission.user_id, pageDiff);
+        }
+        
+        console.log(`Submission ${submissionId} updated by user ${req.user.id}`);
+        res.json({ success: true, message: "Submission updated", submission: updated });
+    } catch (err) {
+        console.error('Error updating submission:', err);
+        res.json({ success: false, message: "Error updating submission" });
+    }
+});
+
+// API - Delete submission
+app.post("/api/submission/:id/delete", ensureAuthenticated, async (req, res) => {
+    try {
+        const submissionId = parseInt(req.params.id);
+        
+        // Get submission to verify permissions and get user info
+        const submissions = await getSubmissionsByStudent(req.user.id);
+        const submission = submissions.find(s => s.id === submissionId);
+        
+        if (!submission && req.user.role !== 'teacher') {
+            return res.json({ success: false, message: "You don't have permission to delete this" });
+        }
+        
+        // Delete submission
+        await deleteSubmission(submissionId);
+        
+        console.log(`Submission ${submissionId} deleted by user ${req.user.id}`);
+        res.json({ success: true, message: "Submission deleted" });
+    } catch (err) {
+        console.error('Error deleting submission:', err);
+        res.json({ success: false, message: "Error deleting submission" });
     }
 });
 

@@ -120,6 +120,21 @@ export const initializeDatabase = async () => {
             console.log('Orphaned homework cleanup: Skipped or already clean');
         }
 
+        // Create submissions table for tracking page entries
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS submissions (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                class_id INTEGER NOT NULL REFERENCES classes(id),
+                from_page DECIMAL(10, 2) NOT NULL,
+                to_page DECIMAL(10, 2) NOT NULL,
+                pages_read DECIMAL(10, 2) NOT NULL,
+                surah VARCHAR(100),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
         console.log('✅ Database tables created successfully');
     } catch (err) {
         console.error('Database initialization error:', err.message);
@@ -243,4 +258,71 @@ export const changeUserClass = async (userId, newClassId) => {
         [newClassId, userId]
     );
     return result.rows[0];
+};
+
+// Submission management functions
+// Get all submissions for a class (for teacher dashboard)
+export const getSubmissionsByClass = async (classId) => {
+    const result = await pool.query(`
+        SELECT s.id, s.user_id, s.from_page, s.to_page, s.pages_read, s.surah, s.created_at, s.updated_at, u.full_name
+        FROM submissions s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.class_id = $1
+        ORDER BY s.created_at DESC
+    `, [classId]);
+    return result.rows;
+};
+
+// Get submissions for a specific student
+export const getSubmissionsByStudent = async (userId) => {
+    const result = await pool.query(`
+        SELECT id, user_id, class_id, from_page, to_page, pages_read, surah, created_at, updated_at
+        FROM submissions
+        WHERE user_id = $1
+        ORDER BY created_at DESC
+    `, [userId]);
+    return result.rows;
+};
+
+// Create a submission
+export const createSubmission = async (userId, classId, fromPage, toPage, pagesRead, surah) => {
+    const result = await pool.query(`
+        INSERT INTO submissions (user_id, class_id, from_page, to_page, pages_read, surah)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id, user_id, class_id, from_page, to_page, pages_read, surah, created_at, updated_at
+    `, [userId, classId, fromPage, toPage, pagesRead, surah]);
+    return result.rows[0];
+};
+
+// Update a submission
+export const updateSubmission = async (submissionId, fromPage, toPage, pagesRead, surah) => {
+    const result = await pool.query(`
+        UPDATE submissions
+        SET from_page = $1, to_page = $2, pages_read = $3, surah = $4, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $5
+        RETURNING id, user_id, class_id, from_page, to_page, pages_read, surah, created_at, updated_at
+    `, [fromPage, toPage, pagesRead, surah, submissionId]);
+    return result.rows[0];
+};
+
+// Delete a submission and adjust user's pages_read
+export const deleteSubmission = async (submissionId) => {
+    // Get submission details first
+    const subResult = await pool.query('SELECT user_id, pages_read FROM submissions WHERE id = $1', [submissionId]);
+    if (subResult.rows.length === 0) {
+        throw new Error('Submission not found');
+    }
+    
+    const { user_id, pages_read } = subResult.rows[0];
+    
+    // Delete the submission
+    await pool.query('DELETE FROM submissions WHERE id = $1', [submissionId]);
+    
+    // Adjust user's total pages_read
+    await pool.query(
+        'UPDATE users SET pages_read = pages_read - $1 WHERE id = $2',
+        [pages_read, user_id]
+    );
+    
+    return { success: true };
 };
