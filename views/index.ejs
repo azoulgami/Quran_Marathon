@@ -160,7 +160,7 @@
                 return;
             }
             
-            const pagesRead = toPage - fromPage;
+            const pagesRead = toPage - fromPage + 1;
             
             fetch('/api/entries', {
                 method: 'POST',
