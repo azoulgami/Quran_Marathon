@@ -18,14 +18,31 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 40px;
-            padding-bottom: 20px;
+            padding-bottom: 25px;
+            border-bottom: 3px solid #6c5ce7;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .submissions-header h1 {
             margin: 0;
             color: #2c3e50;
-            font-size: 2em;
+            font-size: 2.2em;
             font-weight: 700;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .submissions-header > div:first-child {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .submissions-header > div:first-child p {
+            margin: 5px 0 0 0 !important;
+            color: #7f8c8d;
+            font-size: 0.95em;
+            font-weight: 500;
         }
 
         .back-button {
@@ -357,6 +374,95 @@
             justify-content: flex-end;
             margin-top: 20px;
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .submissions-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .submissions-header h1 {
+                font-size: 1.6em;
+                width: 100%;
+            }
+
+            .submissions-header > div:first-child {
+                width: 100%;
+            }
+
+            .back-button {
+                width: 100%;
+                text-align: center;
+            }
+
+            .submissions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .submission-card {
+                padding: 15px;
+            }
+
+            .card-header {
+                padding-bottom: 10px;
+                margin-bottom: 12px;
+            }
+
+            .student-name {
+                font-size: 1.1em;
+            }
+
+            .card-content {
+                gap: 10px;
+            }
+
+            .submission-actions {
+                flex-direction: column;
+            }
+
+            .btn-edit, .btn-delete {
+                width: 100%;
+            }
+
+            .modal-content {
+                width: 95%;
+                max-width: none;
+                margin: 50% auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .submissions-header h1 {
+                font-size: 1.3em;
+            }
+
+            .submissions-container {
+                padding: 10px;
+            }
+
+            .submission-card {
+                padding: 12px;
+            }
+
+            .card-content {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .surah-info {
+                margin-top: 0;
+            }
+
+            .info-label {
+                font-size: 0.75em;
+            }
+
+            .info-value {
+                font-size: 1em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -374,7 +480,8 @@
     <div class="submissions-container">
         <div class="submissions-header">
             <div>
-                <h1><%= className %> - Student Submissions</h1>
+                <h1>👨‍🏫 <%= className %></h1>
+                <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 1em;">📋 Student Submissions</p>
             </div>
             <a href="/class/<%= classId %>" class="back-button">← Back to Class</a>
         </div>
