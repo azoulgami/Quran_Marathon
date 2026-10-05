@@ -17,85 +17,161 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #e0e0e0;
-            padding-bottom: 15px;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
         }
 
         .submissions-header h1 {
             margin: 0;
-            color: #333;
+            color: #2c3e50;
+            font-size: 2em;
+            font-weight: 700;
         }
 
         .back-button {
-            padding: 8px 15px;
+            padding: 10px 20px;
             background: #6c5ce7;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
+            font-weight: 500;
+            transition: background 0.3s;
         }
 
         .back-button:hover {
             background: #5f4fd1;
         }
 
-        .submissions-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
+        .submissions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
         }
 
-        .submissions-table thead {
+        .submission-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            transition: box-shadow 0.3s, transform 0.2s;
+        }
+
+        .submission-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 12px;
+        }
+
+        .student-name {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .submission-badge {
             background: #6c5ce7;
             color: white;
-        }
-
-        .submissions-table th {
-            padding: 15px;
-            text-align: left;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
             font-weight: 600;
         }
 
-        .submissions-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #e0e0e0;
+        .card-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
         }
 
-        .submissions-table tbody tr:hover {
-            background: #f5f5f5;
+        .info-item {
+            display: flex;
+            flex-direction: column;
         }
 
-        .submission-date {
-            color: #666;
+        .info-label {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 1.1em;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .surah-info {
+            grid-column: 1 / -1;
+            background: #ecf0f1;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 5px;
+        }
+
+        .surah-label {
+            font-size: 0.75em;
+            color: #7f8c8d;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .surah-value {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .card-dates {
+            grid-column: 1 / -1;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
             font-size: 0.9em;
+            color: #7f8c8d;
         }
 
         .submission-actions {
             display: flex;
             gap: 10px;
+            margin-top: 15px;
+            border-top: 2px solid #ecf0f1;
+            padding-top: 15px;
         }
 
         .btn-edit, .btn-delete {
-            padding: 6px 12px;
+            flex: 1;
+            padding: 10px 15px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 0.9em;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s;
         }
 
         .btn-edit {
-            background: #3498db;
+            background: #27ae60;
             color: white;
         }
 
         .btn-edit:hover {
-            background: #2980b9;
+            background: #229954;
+            transform: scale(1.02);
         }
 
         .btn-delete {
@@ -105,13 +181,14 @@
 
         .btn-delete:hover {
             background: #c0392b;
+            transform: scale(1.02);
         }
 
         .no-submissions {
             text-align: center;
-            padding: 40px;
-            color: #666;
-            font-size: 1.1em;
+            padding: 60px 20px;
+            color: #7f8c8d;
+            font-size: 1.2em;
         }
 
         .modal {
@@ -205,7 +282,81 @@
         .btn-cancel:hover {
             background: #95a5a6;
         }
-    </style>
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 25px;
+            border: none;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.5em;
+        }
+
+        .modal-content form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal-content label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .modal-content input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
 </head>
 <body>
     <div class="header-top">
@@ -228,56 +379,57 @@
         </div>
 
         <% if (submissions.length > 0) { %>
-            <table class="submissions-table">
-                <thead>
-                    <tr>
-                        <th>Student Name</th>
-                        <th>From Page</th>
-                        <th>To Page</th>
-                        <th>Pages Read</th>
-                        <th>Surah</th>
-                        <th>Date Submitted</th>
-                        <th>Last Updated</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% submissions.forEach(submission => { %>
-                        <tr>
-                            <td><strong><%= submission.full_name %></strong></td>
-                            <td><%= formatPages(submission.from_page) %></td>
-                            <td><%= formatPages(submission.to_page) %></td>
-                            <td><strong><%= formatPages(submission.pages_read) %></strong></td>
-                            <td><%= submission.surah || '-' %></td>
-                            <td>
-                                <span class="submission-date">
-                                    <%= new Date(submission.created_at).toLocaleDateString() %>
-                                    <%= new Date(submission.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
-                                </span>
-                            </td>
-                            <td>
-                                <span class="submission-date">
-                                    <% if (new Date(submission.updated_at).getTime() !== new Date(submission.created_at).getTime()) { %>
-                                        <%= new Date(submission.updated_at).toLocaleDateString() %>
-                                        <%= new Date(submission.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
-                                    <% } else { %>
-                                        -
-                                    <% } %>
-                                </span>
-                            </td>
-                            <td>
-                                <div class="submission-actions">
-                                    <button class="btn-edit" onclick="openEditModal(<%= submission.id %>, <%= submission.from_page %>, <%= submission.to_page %>, '<%= submission.surah %>)">Edit</button>
-                                    <button class="btn-delete" onclick="deleteSubmission(<%= submission.id %>)">Delete</button>
+            <div class="submissions-grid">
+                <% submissions.forEach(submission => { %>
+                    <div class="submission-card">
+                        <div class="card-header">
+                            <h2 class="student-name"><%= submission.full_name %></h2>
+                            <span class="submission-badge">📋</span>
+                        </div>
+
+                        <div class="card-content">
+                            <div class="info-item">
+                                <span class="info-label">From Page</span>
+                                <span class="info-value"><%= formatPages(submission.from_page) %></span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">To Page</span>
+                                <span class="info-value"><%= formatPages(submission.to_page) %></span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Pages Read</span>
+                                <span class="info-value" style="color: #27ae60;"><strong><%= formatPages(submission.pages_read) %></strong></span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Date</span>
+                                <span class="info-value"><%= new Date(submission.created_at).toLocaleDateString() %></span>
+                            </div>
+
+                            <% if (submission.surah) { %>
+                                <div class="surah-info">
+                                    <div class="surah-label">Surah</div>
+                                    <div class="surah-value"><%= submission.surah %></div>
                                 </div>
-                            </td>
-                        </tr>
-                    <% }); %>
-                </tbody>
-            </table>
+                            <% } %>
+
+                            <div class="card-dates">
+                                <strong>📅 Submitted:</strong> <%= new Date(submission.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                                <% if (new Date(submission.updated_at).getTime() !== new Date(submission.created_at).getTime()) { %>
+                                    <br><strong>✏️ Updated:</strong> <%= new Date(submission.updated_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <div class="submission-actions">
+                            <button class="btn-edit" onclick="openEditModal(<%= submission.id %>, <%= submission.from_page %>, <%= submission.to_page %>, '<%= submission.surah %>)">✏️ Edit</button>
+                            <button class="btn-delete" onclick="deleteSubmission(<%= submission.id %>)">🗑️ Delete</button>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
         <% } else { %>
             <div class="no-submissions">
-                <p>No submissions yet</p>
+                <p>📝 No submissions yet</p>
             </div>
         <% } %>
     </div>
