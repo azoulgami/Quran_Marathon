@@ -332,8 +332,8 @@
             const toPage = document.getElementById('editToPage').value;
             const surah = document.getElementById('editSurah').value;
             
-            if (parseFloat(toPage) <= parseFloat(fromPage)) {
-                alert('To Page must be greater than From Page');
+            if (parseFloat(toPage) < parseFloat(fromPage)) {
+                alert('To Page must be greater than or equal to From Page');
                 return;
             }
             
