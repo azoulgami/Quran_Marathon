@@ -227,8 +227,8 @@ app.post("/api/entries", ensureAuthenticated, async (req, res) => {
         const { pages, surah } = req.body;
         const userId = req.user.id;
         
-        // Update pages for logged-in user
-        const result = await updateUserPages(userId, parseInt(pages));
+        // Update pages for logged-in user (supports decimals for half-page increments)
+        const result = await updateUserPages(userId, parseFloat(pages));
         console.log(`Updated entry for user ${userId}: ${pages} pages (${surah})`);
         res.json({ success: true, message: "Pages added", pagesRead: result.pages_read });
     } catch (err) {

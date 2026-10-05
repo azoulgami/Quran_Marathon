@@ -33,6 +33,17 @@ export const initializeDatabase = async () => {
             console.log('Role column migration: Column may already exist or is being skipped');
         }
 
+        // Migrate pages_read to DECIMAL to support half-page increments
+        try {
+            await pool.query(`
+                ALTER TABLE users
+                ALTER COLUMN pages_read TYPE DECIMAL(10, 2);
+            `);
+            console.log('✅ Converted pages_read to DECIMAL for half-page support');
+        } catch (e) {
+            console.log('Pages read migration: Column may already be DECIMAL or skipped');
+        }
+
         await pool.query(`
             CREATE TABLE IF NOT EXISTS homework (
                 id SERIAL PRIMARY KEY,
