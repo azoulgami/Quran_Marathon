@@ -17,6 +17,19 @@ const __dirname = dirname(__filename);
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Helper function to format decimal pages as fractions
+const formatPages = (pages) => {
+    if (pages === null || pages === undefined) return "0";
+    const num = parseFloat(pages);
+    const whole = Math.floor(num);
+    const decimal = num - whole;
+    
+    if (Math.abs(decimal - 0.5) < 0.01) { // Use small epsilon for floating point comparison
+        return whole === 0 ? "1/2" : `${whole} 1/2`;
+    }
+    return whole.toString();
+};
+
 
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -194,10 +207,10 @@ app.get("/", async (req, res) => {
             totalPages: cls.total_pages
         }));
         const globalLeaderboard = await getAllStudents();
-        res.render("index.ejs", { classes, globalLeaderboard, user: req.user });
+        res.render("index.ejs", { classes, globalLeaderboard, user: req.user, formatPages });
     } catch (err) {
         console.error('Error fetching classes:', err);
-        res.render("index.ejs", { classes: [], globalLeaderboard: [], user: req.user });
+        res.render("index.ejs", { classes: [], globalLeaderboard: [], user: req.user, formatPages });
     }
 });
 
@@ -214,10 +227,10 @@ app.get("/class/:id", async (req, res) => {
         // Get homework for this class
         const homework = await getHomeworkByClass(classId);
         
-        res.render("class.ejs", { classId, className, students, homework, user: req.user });
+        res.render("class.ejs", { classId, className, students, homework, user: req.user, formatPages });
     } catch (err) {
         console.error('Error fetching class:', err);
-        res.render("class.ejs", { classId: 0, className: "Error", students: [], homework: null, user: req.user });
+        res.render("class.ejs", { classId: 0, className: "Error", students: [], homework: null, user: req.user, formatPages });
     }
 });
 
